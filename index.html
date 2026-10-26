@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FitRoom 3D 智能试衣间 —— 选择衣物与人物，一键生成 3D 试穿效果，多角度旋转查看与穿搭对比。">
+  <title>FitRoom 3D · 智能试衣间</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/vendor/lucide.min.js"></script>
+</head>
+<body>
+<div id="fitroom-proto" lang="zh-CN">
+
+  <header class="fr-topbar">
+    <div class="fr-logo">
+      <div class="fr-logo-mark"><i data-lucide="sparkles" aria-hidden="true"></i></div>
+      <div><b>FitRoom 3D · 智能试衣间</b><small>Web 版 · Three.js 实时渲染</small></div>
+    </div>
+    <div class="fr-steps" role="list" aria-label="试穿流程">
+      <span class="fr-step" id="fs1"><i class="num">1</i>选衣物</span>
+      <span class="fr-step" id="fs2"><i class="num">2</i>选人物</span>
+      <span class="fr-step" id="fs3"><i class="num">3</i>AI 生成</span>
+      <span class="fr-step" id="fs4"><i class="num">4</i>3D 查看</span>
+    </div>
+    <button class="fr-btn" id="fr-reset"><i data-lucide="refresh-cw" aria-hidden="true"></i>重置</button>
+  </header>
+
+  <main class="fr-layout">
+    <!-- 左：衣物素材 -->
+    <aside class="fr-panel" aria-label="衣物素材">
+      <div class="fr-h"><i data-lucide="shirt" aria-hidden="true"></i>衣物素材<span class="fr-h-sub" id="fr-gcount"></span></div>
+      <div class="fr-tabs" role="tablist" aria-label="衣物类目" id="fr-tabs"></div>
+      <div class="fr-ggrid" id="fr-ggrid"></div>
+      <input type="file" id="fr-gfile" accept="image/*" hidden>
+    </aside>
+
+    <!-- 中：3D 舞台 -->
+    <section class="fr-stagewrap" aria-label="3D 试衣展示">
+      <div class="fr-toolbar">
+        <div class="fr-views" role="group" aria-label="预设视角">
+          <button class="fr-view" data-ang="0" aria-pressed="true">正面</button>
+          <button class="fr-view" data-ang="90" aria-pressed="false">侧面</button>
+          <button class="fr-view" data-ang="180" aria-pressed="false">背面</button>
+        </div>
+        <span class="sep"></span>
+        <button class="fr-btn fr-btn-icon" id="fr-rot" data-tooltip="自动旋转" aria-label="自动旋转"><i data-lucide="play" aria-hidden="true"></i></button>
+        <span class="sep"></span>
+        <div class="fr-zoom">
+          <button class="fr-btn fr-btn-icon" id="fr-zout" aria-label="缩小"><i data-lucide="zoom-out" aria-hidden="true"></i></button>
+          <input type="range" id="fr-zoom" min="60" max="140" value="100" aria-label="缩放">
+          <button class="fr-btn fr-btn-icon" id="fr-zin" aria-label="放大"><i data-lucide="zoom-in" aria-hidden="true"></i></button>
+        </div>
+        <span class="sp"></span>
+        <span class="fr-angle" id="fr-angle">0°</span>
+      </div>
+      <div class="fr-chips" id="fr-chips"></div>
+      <div class="fr-stage" id="fr-stage">
+        <div class="fr-person-chip" id="fr-pchip"></div>
+        <span class="fr-demo-pill">演示模式</span>
+        <div class="fr-hint"><i data-lucide="rotate-3d" aria-hidden="true"></i>按住拖拽旋转 · 滚轮缩放</div>
+        <div class="fr-stage-err" id="fr-stagerr" hidden>3D 引擎初始化失败：当前浏览器不支持 WebGL。</div>
+        <div class="fr-gen" id="fr-gen" hidden>
+          <div class="fr-gen-card">
+            <div class="fr-gen-title"><i data-lucide="sparkles" class="spin" aria-hidden="true"></i>AI 试穿生成中…</div>
+            <ul class="fr-gen-steps" id="fr-gsteps"></ul>
+            <div class="fr-progress" role="progressbar" aria-label="生成进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="fr-gprog"><div id="fr-gbar"></div></div>
+            <div class="fr-gen-pct" id="fr-gpct">0%</div>
+          </div>
+        </div>
+        <div class="fr-compare" id="fr-compare" hidden>
+          <div class="fr-compare-head"><i data-lucide="columns-2" aria-hidden="true"></i>穿搭对比
+            <span class="sp"></span>
+            <button class="fr-btn fr-btn-icon" id="fr-cmp-close" aria-label="退出对比"><i data-lucide="x" aria-hidden="true"></i></button>
+          </div>
+          <div class="fr-compare-grid" id="fr-cmp-grid"></div>
+        </div>
+        <div class="fr-toast" role="status" id="fr-toast"></div>
+      </div>
+      <div class="fr-actions">
+        <button class="fr-btn fr-btn-primary grow" id="fr-generate"><i data-lucide="sparkles" aria-hidden="true"></i>开始试穿</button>
+        <button class="fr-btn" id="fr-save" disabled><i data-lucide="bookmark" aria-hidden="true"></i>保存</button>
+        <button class="fr-btn" id="fr-share" disabled><i data-lucide="share-2" aria-hidden="true"></i>分享</button>
+      </div>
+    </section>
+
+    <!-- 右：人物 + 试衣间 -->
+    <aside class="fr-panel" aria-label="试穿人物">
+      <div class="fr-h"><i data-lucide="person-standing" aria-hidden="true"></i>试穿人物</div>
+      <div class="fr-pgrid" id="fr-pgrid"></div>
+      <input type="file" id="fr-pfile" accept="image/*" hidden>
+      <div class="fr-sec">
+        <div class="fr-h"><i data-lucide="bookmark" aria-hidden="true"></i>我的试衣间
+          <span class="fr-h-sub"><button class="fr-toggle" id="fr-cmp-toggle" aria-pressed="false"><i data-lucide="columns-2" aria-hidden="true"></i>对比</button></span>
+        </div>
+        <div id="fr-looks"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="fr-note">
+    <i data-lucide="info" aria-hidden="true"></i>
+    <span>原型演示说明：3D 人物与服装为 Three.js 实时渲染的参数化人体（正式版 V2.0 路线为 SMPL 人体 + 服装网格）；「AI 生成」为模拟流水线（正式版接入 IDM-VTON 类试穿模型生成真实上身图）；上传衣物以提取主色示意（正式版为 AI 抠图 + 类目识别）。</span>
+  </footer>
+
+  <!-- 摄像头(模拟)弹层 -->
+  <div class="fr-modal" id="fr-cam" hidden>
+    <div class="fr-cam" id="fr-cam-card">
+      <h3><i data-lucide="camera" aria-hidden="true"></i>真人拍摄（演示）</h3>
+      <button class="fr-btn fr-btn-icon x" id="fr-cam-x" aria-label="关闭"><i data-lucide="x" aria-hidden="true"></i></button>
+      <div class="fr-viewfinder">
+        <span class="fr-corner tl"></span><span class="fr-corner tr"></span><span class="fr-corner bl"></span><span class="fr-corner br"></span>
+        <div class="sil" id="fr-cam-sil"></div>
+        <div class="fr-cam-tip">请全身入镜，双脚并拢（演示画面）</div>
+        <div class="fr-cam-count" id="fr-cam-count" hidden>3</div>
+        <div class="fr-cam-flash"></div>
+      </div>
+      <div class="fr-cam-foot">
+        <button class="fr-btn grow" id="fr-cam-cancel">取消</button>
+        <button class="fr-btn fr-btn-primary grow" id="fr-cam-shot"><i data-lucide="camera" aria-hidden="true"></i>拍摄</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
