@@ -2,7 +2,9 @@
 
 选择衣物与人物，一键生成 3D 试穿效果；360° 旋转、缩放查看，保存多套穿搭并排对比。
 
-在线体验：**https://pikaqim.github.io/fitroom-3d/**
+在线体验（双免费域名）：
+- Cloudflare Pages：**https://fitroom-3d.pages.dev/**（国内访问推荐）
+- GitHub Pages：**https://pikaqim.github.io/fitroom-3d/**
 
 ## 功能
 

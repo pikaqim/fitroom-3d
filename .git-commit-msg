@@ -1,8 +1,1 @@
-FitRoom 3D web app: Three.js parametric fitting-room prototype
-
-- Garment catalog (tops/bottoms/dresses/shoes) with upload color-pick demo
-- Three preset models + custom photo / simulated camera capture
-- Simulated AI try-on pipeline
-- 3D viewer: 360 rotation, zoom, preset views, auto turntable (lathe-based body modeling)
-- Look saving, side-by-side compare, localStorage persistence
-- Acceptance report 13/13 passed: tests/acceptance-report.md
+deploy: add Cloudflare Pages (fitroom-3d.pages.dev) config and live URLs
